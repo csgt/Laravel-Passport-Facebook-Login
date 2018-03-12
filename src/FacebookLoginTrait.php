@@ -4,6 +4,7 @@ namespace Danjdewhurst\PassportFacebookLogin;
 use Facebook\Facebook;
 use Illuminate\Http\Request;
 use League\OAuth2\Server\Exception\OAuthServerException;
+use App\Models\Usuarioquiniela;
 
 trait FacebookLoginTrait
 {
@@ -73,6 +74,16 @@ trait FacebookLoginTrait
                     $user->{$email_column}    = $fbUser['email'];
                     $user->{$password_column} = bcrypt(uniqid('fb_', true)); // Random password.
                     $user->save();
+
+                    //Si es quiniela lepegue, lo inscribimos automaticamente
+                    if ($request->input('quinielaid', 0) === '1') {
+                        $uq = new Usuarioquiniela;
+                        $uq->usuarioid = $user->usuarioid;
+                        $uq->quinielaid = 1;
+                        $uq->nombre = 'Auto por registro';
+                        $uq->casillas = 48;
+                        $uq->save();
+                    }
 
                     /**
                      * Attach a role to the user.
